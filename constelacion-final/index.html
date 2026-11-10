@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es" data-tema="oscuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Constelación de posgrados</title>
+<link rel="stylesheet" href="https://use.typekit.net/uzc2xns.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0..200&display=swap">
+<link rel="stylesheet" href="constelacion-posgrados.css">
+</head>
+<body>
+<div id="app">
+
+  <main>
+    <canvas id="lienzo" tabindex="0" role="img" aria-label="Constelación de cursos de posgrado. Toca un curso para ver sus detalles en el panel de la derecha."></canvas>
+    <button type="button" id="btnVolver" class="volver-header oculto"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span><span class="largo">Volver a todas las maestrías</span><span class="corto">Volver</span></button>
+    <div class="topbar" id="topbar">
+      <div class="buscador" id="buscador">
+        <input type="search" id="buscar" list="listaCursos" placeholder="Buscar un curso" aria-label="Buscar un curso por nombre" autocomplete="off">
+        <datalist id="listaCursos"></datalist>
+      </div>
+      <div class="zoom" role="group" aria-label="Zoom">
+        <button type="button" id="btnLeyenda" class="btn-leyenda" aria-expanded="false" aria-controls="colIzq"><span class="material-symbols-outlined" aria-hidden="true">menu</span> Programas</button>
+        <button type="button" id="btnZoomMas" class="ico" aria-label="Acercar"><span class="material-symbols-outlined" aria-hidden="true">add</span></button>
+        <button type="button" id="btnZoomMenos" class="ico" aria-label="Alejar"><span class="material-symbols-outlined" aria-hidden="true">remove</span></button>
+        <button type="button" id="btnZoomReiniciar" class="ico" aria-label="Restablecer zoom y giro"><span class="material-symbols-outlined" aria-hidden="true">refresh</span></button>
+        <button type="button" id="btnDatos" class="ico ajustes" aria-haspopup="dialog" aria-label="Ajustes" title="Ajustes"><span class="material-symbols-outlined" aria-hidden="true">settings</span><span id="badgeAv" class="badge" hidden></span></button>
+      </div>
+    </div>
+    <nav class="barra-niveles" id="barraNiveles" role="radiogroup" aria-label="¿Qué quieres ver?"></nav>
+    <div class="col-izq" id="colIzq">
+      <button type="button" id="btnCerrarLeyenda" class="cerrar-leyenda" aria-label="Cerrar el menú de programas">Cerrar <span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+      <details class="conv" id="leyendaPanel" open>
+        <summary>Programas</summary>
+        <div class="conv-cuerpo" id="leyenda"></div>
+      </details>
+    </div>
+    <section class="panel" id="panel" aria-live="polite">
+      <details id="detalle" open>
+        <summary><span id="resumenDetalle">Detalle</span></summary>
+        <div class="detalle-cuerpo">
+            <div id="texto"></div>
+        </div>
+      </details>
+    </section>
+    <span id="subtitulo" hidden></span>
+    <div id="tituloSel" class="titulo-sel" aria-live="polite"><p class="t" id="tituloSelT">Escuela de posgrados</p><p class="s" id="tituloSelS">Facultad de Artes y Humanidades</p></div>
+    <div id="tip" role="tooltip"></div>
+    <div id="vacio">No hay cursos para dibujar. Carga un archivo con la tabla de cursos o vuelve al ejemplo.</div>
+  </main>
+</div>
+
+<aside class="cajon" id="cajon" aria-label="Ajustes" aria-hidden="true">
+  <header>
+    <h2 id="tituloCajon">Ajustes</h2>
+    <button type="button" id="btnCerrar">Cerrar</button>
+  </header>
+  <div class="cuerpo">
+    <section id="seccionAdvertencias">
+      <h3>Validaciones</h3>
+      <button type="button" id="btnAdvertencias" data-n="0">Advertencias (0)</button>
+      <p class="ayuda" id="resumenValidaciones"></p>
+      <ul id="listaAdvertencias"></ul>
+    </section>
+
+    <section id="seccionCoord">
+      <h3>Vista de coordinación</h3>
+      <p class="ayuda">Todos los cursos y todas las conexiones a la vez, con controles de profundidad, estilo y modo. Pensada para quien coordina la oferta.</p>
+      <div class="botones"><button type="button" id="btnCoord">Ver todo junto</button></div>
+      <div class="botones">
+        <button type="button" id="btnVista" aria-pressed="false">2D ↔ 3D</button>
+        <button type="button" id="btnEstilo" title="Cambiar entre el estilo brillante y el técnico (plano, blanco y negro)">Estilo: brillante</button>
+        <button type="button" id="btnUniones" title="Cambiar la forma de las uniones entre cursos">Uniones: estelas</button>
+        <button type="button" id="btnTema">Modo claro</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>Tus datos</h3>
+      <p class="ayuda">Sube un único Excel (.xlsx) con tres hojas: programas, cursos (una fila por curso y una columna por programa, con X o E) y reglas. Descarga la plantilla para ver cómo llenarla. Todo se lee en este navegador; ningún dato se envía a ningún lado.</p>
+      <div class="botones">
+        <button type="button" id="btnCargar">Cargar archivo</button>
+        <button type="button" id="btnEjemplo" class="oculto">Volver al ejemplo</button>
+        <input type="file" id="archivo" accept=".xlsx,.xls" hidden>
+      </div>
+      <div class="botones" style="margin-top:8px">
+        <button type="button" id="btnPlantillaXlsx">Plantilla vacía (Excel)</button>
+        <button type="button" id="btnEjemploXlsx">Ejemplo con datos (Excel)</button>
+      </div>
+      <p id="mensajeCarga" role="status"></p>
+    </section>
+
+    <section id="seccionEjemplo">
+      <h3>Escenarios del ejemplo</h3>
+      <p class="ayuda">Estos controles solo cambian los datos de ejemplo. Con un archivo cargado se ocultan.</p>
+      <div class="ctl"><label for="cNMaestrias">Maestrías</label><output id="oNMaestrias"></output>
+        <input type="range" id="cNMaestrias" min="2" max="6" step="1" value="5"></div>
+      <div class="ctl"><label for="cConEnfasis">Maestrías con énfasis</label><output id="oConEnfasis"></output>
+        <input type="range" id="cConEnfasis" min="0" max="6" step="1" value="3"></div>
+      <div class="ctl"><label for="cEnfasisPor">Énfasis por maestría</label><output></output>
+        <select id="cEnfasisPor"><option value="mixto">3 y 5 alternados</option><option value="3">3</option><option value="5">5</option></select></div>
+      <div class="ctl"><label for="cProyectos">Proyectos por maestría</label><output></output>
+        <select id="cProyectos"><option value="mixto">2 y 3 alternados</option><option value="2">2</option><option value="3">3</option></select></div>
+      <div class="ctl"><label for="cCompartidos">Cursos obligatorios en dos maestrías</label><output id="oCompartidos"></output>
+        <input type="range" id="cCompartidos" min="0" max="8" step="1" value="5"></div>
+      <div class="ctl"><label for="cPctElectivas">Cursos abiertos como electivos</label><output id="oPctElectivas"></output>
+        <input type="range" id="cPctElectivas" min="0" max="100" step="5" value="60"></div>
+      <div class="ctl check"><input type="checkbox" id="cDoctorado" checked><label for="cDoctorado">Incluir doctorado de ejemplo</label></div>
+    </section>
+
+    <section>
+      <h3>Cómo leerlo</h3>
+      <p class="ayuda">Cada punto es un curso; los blancos son los de toda la escuela. El brillo marca dónde se concentran los cursos de una maestría y el brillo más claro, un bloque. Una estela une un curso con otra maestría a la que también pertenece.</p>
+      <div class="botones"><button type="button" id="btnTema2">Cambiar entre modo claro y oscuro</button></div>
+    </section>
+
+    <section>
+      <h3>Movimiento</h3>
+      <label class="vista profundidad" for="rangoProfundidad">Plano
+        <input type="range" id="rangoProfundidad" min="0" max="100" value="60" aria-label="Profundidad de la vista, de plano a tridimensional">
+        Profundidad</label>
+      <div class="ctl check"><input type="checkbox" id="cVaiven" checked><label for="cVaiven">Vaivén suave de la vista</label></div>
+      <p class="ayuda">Arrastra sobre el lienzo para girar la vista libremente en 3D, en cualquier dirección y con inercia (con la profundidad en cero es plana). Rueda o pellizco para acercar: el zoom siempre va hacia el centro, que no se puede mover, y con zoom también se puede girar (con algo elegido, gira alrededor de ese punto). Teclado: + − 0.</p>
+    </section>
+
+    <p class="pie">La librería de lectura de Excel se descarga desde cdnjs; tus datos no salen del navegador.</p>
+  </div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="constelacion-posgrados.js"></script>
+</body>
+</html>
